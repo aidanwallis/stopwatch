@@ -13,15 +13,19 @@ class Stopwatch(ft.Text):
         self.initial_state = self.current_state = timedelta(**self.initial_time)
 
     def did_mount(self):
-        self.toggle = True
         self.value = self.total_time.format(0, 0, 0)
+        self.update()
         self.page.run_task(self.start)
 
     def will_unmount(self):
         self.toggle = False
+        self.update()
 
-    async def toggle_off(self):
-        self.toggle = False
+    def update_toggle(self, new_value, page):
+        self.toggle = new_value
+        if self.toggle:
+            self.page.run_task(self.start)
+        page.update()    
 
     async def start(self):
         while self.toggle == True:
@@ -29,8 +33,10 @@ class Stopwatch(ft.Text):
             await asyncio.sleep(1)
             self.value = self.increment()
 
-    def stop(self):
-        self.current_state = self.initial_state
+    def reset(self):
+       self.current_state = timedelta(**self.initial_time)
+       self.value = self.total_time.format(0, 0, 0)
+       self.update()
 
     def increment(self):
         self.current_state += timedelta(seconds=1)
@@ -39,8 +45,24 @@ class Stopwatch(ft.Text):
         seconds = self.current_state.seconds % 60
         return self.total_time.format(hours, minutes, seconds)
 
+
 if __name__ == '__main__':
     def main(page: ft.Page):
-        page.add(Stopwatch())
+
+        stopwatch = Stopwatch(40)
+
+        def toggle_off(e):
+            stopwatch.update_toggle(False, page)
+            page.update(e)
+
+        def toggle_on(e):
+            stopwatch.update_toggle(True, page)
+            page.update(e)
+
+        page.add(
+                 stopwatch,
+                 ft.ElevatedButton(text = 'Start', on_click = toggle_on, width = 150, height = 60),
+                 ft.ElevatedButton(text = 'Stop', on_click = toggle_off, width = 150, height = 60)
+                )
 
     ft.app(main)
