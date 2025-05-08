@@ -12,3 +12,6 @@ Lap button to save the time on lap completion and display it in a numbered list 
 Usage:
 Install flet and its dependencies (https://flet.dev/docs/)
 Run gui.py
+
+Known Bugs:
+Pressing Save Time button while stopwatch is stopped causes stopwatch to increase by one second
