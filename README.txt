@@ -1,4 +1,4 @@
-A simple Python stopwatch app made using the flet library
+A simple Python stopwatch app made using flet
 
 Authors:
 Aidan Wallis
