@@ -21,6 +21,9 @@ class Stopwatch(ft.Text):
         self.toggle = False
         self.update()
 
+    def get_current_time(self):
+        return self.value
+
     def update_toggle(self, new_value, page):
         self.toggle = new_value
         if self.toggle:
