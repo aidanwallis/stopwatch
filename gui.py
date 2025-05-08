@@ -2,117 +2,63 @@ import flet as ft
 from stopwatch import Stopwatch
 
 def main(page: ft.Page):
-    page.title = "Reign and Aiden's Stopwatch"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.padding = 20
-    page.bgcolor = "#f0f2f5"
-    page.scroll = ft.ScrollMode.AUTO
-    page.window_width = 400
-    page.window_height = 600
 
-    stopwatch = Stopwatch(40)
-    stopwatch.page = page
-    running = False  # Flag to control the timer loop
+    page.title = "Stopwatch"
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    button_state = True
+    
+    def button_click(e):
+        nonlocal button_state
+        button_state = not button_state
 
-    timer_display = ft.Text("00:00", size=32, weight=ft.FontWeight.BOLD, color="#333")
-
-    def update_display():
-        timer_display.value = stopwatch.value
+        if button_state:
+            start_stop_button.text = "Start"
+            toggle_off()
+        else:
+            start_stop_button.text = "Stop"
+            toggle_on()
         page.update()
 
-    lap_list = ft.ListView(
-        expand=True,
-        spacing=10,
-        padding=10,
-        auto_scroll=True,
-        height=200,
-        divider_thickness=1,
-    )
-
-    async def start_clicked(e):
-        nonlocal running
-        if not stopwatch.toggle:
-            stopwatch.toggle = True
-            running = True  # Allow the loop to run
-            page.run_task(stopwatch.start)
-
-        while running:
-            update_display()
-            await page.sleep(0.5)  # Refresh interval
-
-    async def pause_clicked(e):
-        nonlocal running
-        running = False  # Stop the loop from updating
-        stopwatch.stop()
+    def toggle_off():
+        stopwatch.update_toggle(False, page)
         page.update()
 
-    def reset_clicked(e):
-        nonlocal running
-        running = False  # Stop updating when reset
+    def toggle_on():
+        stopwatch.update_toggle(True, page)
+        page.update()
+
+    def reset_click(e):
         stopwatch.reset()
-        lap_list.controls.clear()
-        update_display()
-
-    def lap_clicked(e):
-        lap_list.controls.append(
-            ft.Text(f"Lap {len(lap_list.controls)+1}: {stopwatch.value}", size=16)
-        )
         page.update()
+
+    stopwatch = Stopwatch(60)
+    start_stop_button = ft.ElevatedButton(text="Start", on_click=button_click, width=150, height=60)
+    reset_button = ft.ElevatedButton(text='Reset', on_click=reset_click, width=150, height=60)
+    buttons = ft.Row(
+                [
+                start_stop_button,
+                reset_button
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            )
 
     page.add(
-        ft.Container(
-            content=ft.Column(
+        ft.Row(
+        [
+            ft.Column(
                 [
-                    ft.Text("Stylish Stopwatch", size=24, weight="bold", color="#222"),
-                    ft.Divider(),
-                    ft.Container(
-                        content=ft.Column([
-                            timer_display,
-                            ft.Container(
-                                content=stopwatch,
-                                alignment=ft.alignment.center,
-                                padding=20,
-                                bgcolor="#ffffff",
-                                border_radius=20,
-                                shadow=ft.BoxShadow(blur_radius=8, color="#bbb", spread_radius=1),
-                            ),
-                        ]),
-                        alignment=ft.alignment.center,
-                    ),
-                    ft.Row(
-                        [
-                            ft.ElevatedButton("Start", on_click=start_clicked, style=ft.ButtonStyle(padding=20)),
-                            ft.ElevatedButton("Pause", on_click=pause_clicked, style=ft.ButtonStyle(padding=20)),
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                        spacing=10,
-                    ),
-                    ft.Row(
-                        [
-                            ft.OutlinedButton("Reset", on_click=reset_clicked, style=ft.ButtonStyle(padding=20)),
-                            ft.OutlinedButton("Lap", on_click=lap_clicked, style=ft.ButtonStyle(padding=20)),
-                        ],
-                        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                        spacing=10,
-                    ),
-                    ft.Container(
-                        content=lap_list,
-                        bgcolor="#fff",
-                        border_radius=10,
-                        padding=10,
-                        height=200,
-                        shadow=ft.BoxShadow(blur_radius=6, color="#ccc"),
-                    ),
+                    stopwatch,
+                    buttons
                 ],
-                spacing=20,
-                alignment=ft.MainAxisAlignment.START,
+                alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            ),
-            border_radius=20,
-            bgcolor="#ffffff",
-            padding=20,
-            shadow=ft.BoxShadow(blur_radius=10, color="#aaa", offset=ft.Offset(2, 2)),
+            )    
+        ],
+        expand=True,
+        alignment=ft.MainAxisAlignment.CENTER,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
     )
 
-ft.app(target=main)
+ft.app(main)
